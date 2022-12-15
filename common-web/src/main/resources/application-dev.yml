@@ -1,0 +1,41 @@
+server:
+  port: 8881
+  servlet:
+    # 上下文路径
+    context-path: /resNav
+spring:
+  datasource:
+    druid:
+      url: jdbc:p6spy:mysql://124.222.118.90:3306/resource_nav?connectTimeout=5000&socketTimeout=10000&autoReconnect=true&failOverReadOnly=false&useSSL=false&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
+      username: root
+      password: Fan223
+      driver-class-name: com.p6spy.engine.spy.P6SpyDriver
+      # 关闭空闲检测
+      # test-while-idle: false
+      # 设置空闲检测语句
+      validation-query: SELECT 1
+  redis:
+    host: 124.222.118.90
+    port: 6379
+    password: Fan223
+    database: 0
+#
+#mybatis-plus:
+#  mapper-locations: classpath*:/mapper/**Mapper.xml
+#  configuration:
+#    local-cache-scope: statement
+
+logging:
+  # pattern:
+    # 时间 进程名 日志级别(5个字符靠左对齐) 日志输出者的名称 日志消息 换行符
+    # console: '%d{yyyy-MM-dd-HH:mm:ss} [%thread] %-5level %logger- %msg%n'
+    # file: '%d{yyyy-MM-dd-HH:mm:ss} [%thread] %-5level %logger- %msg%n'
+  level:
+    # 指定整个项目的日志级别
+    root: info
+    # 对某个包指定单独的日志级别
+    # fan.config: warn
+  # 日志文件, 默认路径为项目根目录下
+  file:
+    name: all.log
+
