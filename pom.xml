@@ -14,6 +14,7 @@
         <module>common-base</module>
         <module>common-security</module>
         <module>common-system</module>
+        <module>common-web</module>
     </modules>
 
     <packaging>pom</packaging>
