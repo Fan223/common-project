@@ -5,10 +5,11 @@ import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.CityResponse;
 import com.maxmind.geoip2.record.*;
 import fan.entity.LoginGeoDO;
+import org.springframework.core.io.ClassPathResource;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 
 /**
@@ -19,19 +20,14 @@ import java.net.InetAddress;
  */
 public class AuthUtil {
 
-    private static File database;
-
-    private static DatabaseReader reader;
+    private static final DatabaseReader reader;
 
     static {
-        // 读取数据库文件
-        LogUtil.info("读取数据库文件");
-        database = new File("common-security/src/main/resources/GeoLite2-City.mmdb");
-        // 创建数据库
         try {
+            InputStream database = new ClassPathResource("GeoLite2-City.mmdb").getInputStream();
             reader = new DatabaseReader.Builder(database).build();
         } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -44,9 +40,10 @@ public class AuthUtil {
      * @since 2022/11/28 9:08
      */
     public static String getIpAddress(HttpServletRequest request) {
-        // 首先, 获取 X-Forwarded-For 中的 IP 地址, 它在 HTTP 扩展协议中能表示真实的客户端 IP
+        // 首先, 获取 x-forwarded-for 中的 IP 地址, 它在 HTTP 扩展协议中能表示真实的客户端 IP
         String ipAddress = request.getHeader("X-Forwarded-For");
         if (CommonUtil.isNotBlank(ipAddress) && !"unknown".equalsIgnoreCase(ipAddress)) {
+            LogUtil.info("x-forwarded-for");
             // 多次反向代理后会有多个 ip 值, 第一个 ip 才是真实 ip, 例: X-Forwarded-For: client, proxy1, proxy2, proxy…
             int index = ipAddress.indexOf(",");
             if (index != -1) {
@@ -79,7 +76,7 @@ public class AuthUtil {
             ipAddress = request.getRemoteAddr();
         }
 
-        return ipAddress;
+        return "0:0:0:0:0:0:0:1".equals(ipAddress) ? "127.0.0.1" : ipAddress;
     }
 
     /**
