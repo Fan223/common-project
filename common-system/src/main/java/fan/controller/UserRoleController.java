@@ -1,5 +1,6 @@
 package fan.controller;
 
+import fan.bo.UserRoleBO;
 import fan.command.UserRoleCommand;
 import fan.query.UserRoleQuery;
 import fan.service.UserRoleService;
@@ -8,6 +9,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 用户角色关联Controller
@@ -35,7 +38,8 @@ public class UserRoleController {
     public Result listRoleIds(@PathVariable("userId") String userId, UserRoleQuery userRoleQuery) {
         userRoleQuery.setUserId(userId);
 
-        return Result.success("获取角色列表成功", userRoleService.listRoleIds(userRoleQuery));
+        List<UserRoleBO> userRoleBOS = userRoleService.listUserRoles(userRoleQuery);
+        return Result.success("获取角色列表成功", userRoleBOS.stream().map(UserRoleBO::getRoleId).collect(Collectors.toList()));
     }
 
     /**

@@ -13,6 +13,16 @@ import java.util.List;
 public interface SystemService {
 
     /**
+     * 通过用户 ID 先从 Redis 获取权限, 假如 Redis 不存在则从数据库查询并存入 Redis
+     *
+     * @param userId 用户ID
+     * @return {@link String}
+     * @author Fan
+     * @since 2022/11/27 6:30
+     */
+    String getAuthorities(String userId);
+
+    /**
      * 获取角色 ID 列表, 先从 Redis 获取, 获取不到再从数据库查询, 然后存入 Redis
      *
      * @param authKey 权限顶层Key

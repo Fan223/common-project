@@ -3,6 +3,7 @@ package fan.service.impl;
 import cn.hutool.core.lang.UUID;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import fan.bo.UserRoleBO;
 import fan.command.UserRoleCommand;
 import fan.consts.SystemConst;
 import fan.dao.UserRoleDAO;
@@ -12,6 +13,7 @@ import fan.service.UserRoleService;
 import fan.utils.CommonUtil;
 import fan.utils.RedisUtil;
 import fan.utils.Result;
+import fan.utils.SystemMapStruct;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +21,6 @@ import javax.annotation.Resource;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 用户角色关联接口实现类
@@ -33,18 +34,23 @@ public class UserRoleServiceImpl implements UserRoleService {
     @Resource
     private UserRoleDAO userRoleDAO;
 
+    @Resource
+    private SystemMapStruct systemMapStruct;
+
     @Override
-    public List<String> listRoleIds(UserRoleQuery userRoleQuery) {
+    public List<UserRoleBO> listUserRoles(UserRoleQuery userRoleQuery) {
         LambdaQueryWrapper<UserRoleDO> userRoleQueryWrapper = new LambdaQueryWrapper<>();
-        userRoleQueryWrapper.eq(UserRoleDO::getUserId, userRoleQuery.getUserId())
-                .eq(CommonUtil.isNotBlank(userRoleQuery.getFlag()), UserRoleDO::getFlag, userRoleQuery.getFlag());
+        userRoleQueryWrapper.eq(CommonUtil.isNotBlank(userRoleQuery.getUserId()), UserRoleDO::getUserId, userRoleQuery.getUserId())
+                .eq(CommonUtil.isNotBlank(userRoleQuery.getRoleId()), UserRoleDO::getRoleId, userRoleQuery.getRoleId())
+                .eq(CommonUtil.isNotBlank(userRoleQuery.getFlag()), UserRoleDO::getFlag, userRoleQuery.getFlag())
+                .in(CommonUtil.isNotBlank(userRoleQuery.getRoleIds()), UserRoleDO::getRoleId, userRoleQuery.getRoleIds());
 
         List<UserRoleDO> userRoleDOS = userRoleDAO.selectList(userRoleQueryWrapper);
         if (CommonUtil.isBlank(userRoleDOS)) {
             return null;
         }
 
-        return userRoleDOS.stream().map(UserRoleDO::getRoleId).collect(Collectors.toList());
+        return systemMapStruct.userRoleDOSToBOs(userRoleDOS);
     }
 
     @Override
@@ -94,16 +100,6 @@ public class UserRoleServiceImpl implements UserRoleService {
 
         RedisUtil.del(SystemConst.AUTHENTICATION + ":" + userId);
         return Result.success("分配角色成功", userRoleCommand.getRoleIds().size());
-    }
-
-    @Override
-    public List<String> listUserIds(UserRoleQuery userRoleQuery) {
-        LambdaQueryWrapper<UserRoleDO> userRoleDOQueryWrapper = new LambdaQueryWrapper<>();
-        userRoleDOQueryWrapper.eq(CommonUtil.isNotBlank(userRoleQuery.getRoleId()), UserRoleDO::getRoleId, userRoleQuery.getRoleId())
-                .in(CommonUtil.isNotBlank(userRoleQuery.getRoleIds()), UserRoleDO::getRoleId, userRoleQuery.getRoleIds());
-
-        List<UserRoleDO> userRoleDOS = userRoleDAO.selectList(userRoleDOQueryWrapper);
-        return userRoleDOS.stream().map(UserRoleDO::getUserId).distinct().collect(Collectors.toList());
     }
 
     @Override

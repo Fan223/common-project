@@ -3,7 +3,7 @@ package fan.filter;
 import fan.consts.AuthConst;
 import fan.exception.CustomException;
 import fan.hander.UnAuthenticationEntryPoint;
-import fan.service.UserService;
+import fan.service.SystemService;
 import fan.utils.CommonUtil;
 import fan.utils.JwtUtil;
 import fan.utils.LogUtil;
@@ -36,8 +36,7 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Resource
-    @Lazy
-    private UserService userService;
+    private SystemService systemService;
 
     @Resource
     private UnAuthenticationEntryPoint unAuthenticationEntryPoint;
@@ -72,7 +71,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String userId = claimsJws.getBody().getSubject();
 
         List<GrantedAuthority> grantedAuthorities = AuthorityUtils.commaSeparatedStringToAuthorityList(
-                userService.getAuthorities(userId));
+                systemService.getAuthorities(userId));
 
         // 将权限存入上下文
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =

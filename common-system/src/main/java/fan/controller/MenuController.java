@@ -4,7 +4,7 @@ import cn.hutool.core.map.MapUtil;
 import fan.command.MenuCommand;
 import fan.query.MenuQuery;
 import fan.service.MenuService;
-import fan.service.UserService;
+import fan.service.SystemService;
 import fan.utils.Result;
 import fan.vo.MenuVO;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,7 +29,7 @@ public class MenuController {
     private MenuService menuService;
 
     @Resource
-    private UserService userService;
+    private SystemService systemService;
 
     /**
      * 获取导航菜单列表
@@ -42,7 +42,7 @@ public class MenuController {
     @GetMapping("/listNavMenus")
     public Result listNavMenus(Principal principal) {
         List<MenuVO> menuVOS = menuService.listNavMenusByUserId(principal.getName());
-        String authorities = userService.getAuthorities(principal.getName());
+        String authorities = systemService.getAuthorities(principal.getName());
 
         return Result.success("查询导航菜单列表成功", MapUtil.builder().put("menus", menuVOS)
                 .put("authorities", Arrays.asList(authorities.split(","))).build());

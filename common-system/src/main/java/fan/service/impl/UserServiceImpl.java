@@ -4,17 +4,16 @@ import cn.hutool.core.lang.UUID;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import fan.bo.UserBO;
+import fan.bo.UserRoleBO;
 import fan.command.UserCommand;
 import fan.command.UserRoleCommand;
-import fan.consts.SystemConst;
 import fan.dao.UserDAO;
 import fan.entity.UserDO;
-import fan.enums.MenuTypeEnum;
 import fan.query.*;
 import fan.service.*;
 import fan.utils.*;
-import fan.vo.MenuVO;
 import fan.vo.RoleVO;
+import fan.vo.UserVO;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,15 +37,6 @@ public class UserServiceImpl implements UserService {
     private UserDAO userDAO;
 
     @Resource
-    private RoleService roleService;
-
-    @Resource
-    private MenuService menuService;
-
-    @Resource
-    private SystemService systemService;
-
-    @Resource
     private PasswordEncoder passwordEncoder;
 
     @Resource
@@ -54,6 +44,9 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private SystemMapStruct systemMapStruct;
+
+    @Resource
+    private RoleService roleService;
 
     @Override
     public UserBO getUser(UserQuery userQuery) {
@@ -65,58 +58,6 @@ public class UserServiceImpl implements UserService {
         return systemMapStruct.userDOToBO(userDO);
     }
 
-    public String getAuthorities(String userId) {
-        String authKey = SystemConst.AUTHENTICATION + ":" + userId;
-        String authorities;
-
-        if (RedisUtil.hasKey(authKey)) {
-            LogUtil.info("从 Redis 获取用户权限");
-            authorities = RedisUtil.hashGet(authKey, SystemConst.AUTHORITIES) + "";
-        } else {
-            LogUtil.info("从数据库获取用户权限");
-            authorities = getAuthoritiesByUserId(userId, authKey);
-            RedisUtil.hashSet(authKey, SystemConst.AUTHORITIES, authorities);
-        }
-
-        return authorities;
-    }
-
-    /**
-     * 通过用户名获取该用户的权限信息
-     *
-     * @param userId 用户ID
-     * @return {@link String}
-     * @author Fan
-     * @since 2022/12/7 15:11
-     */
-    private String getAuthoritiesByUserId(String userId, String authKey) {
-        StringBuilder authorities = new StringBuilder();
-
-        // 获取用户拥有的角色 ID 列表
-        List<String> roleIds = systemService.listRoleIds(authKey, userId);
-
-        if (null != roleIds) {
-            // 通过获取的角色 ID 列表查询对应的角色信息
-            List<RoleVO> roleVOS = CommonUtil.castToList(roleService.listRoles(RoleQuery.builder().roleIds(roleIds).build()).getData(), RoleVO.class);
-            String roleAuthorities = roleVOS.stream().map(roleVO -> "ROLE_" + roleVO.getCode()).collect(Collectors.joining(","));
-            authorities.append(roleAuthorities).append(",");
-
-            // 通过获取的角色 ID 列表获取角色拥有的菜单 ID 列表
-            List<String> menuIds = systemService.listMenuIds(authKey, roleIds);
-
-            if (null != menuIds) {
-                // 通过获取到的菜单 ID 列表查询对应的菜单信息, 包含全部类型菜单
-                List<Integer> menuTypes = MenuTypeEnum.getTypeValues(CommonUtil.transToList(String.class, "目录", "菜单", "按钮"));
-                List<MenuVO> menuVOS = menuService.listMenus(MenuQuery.builder().flag("Y").type(menuTypes).menuIds(menuIds).build());
-                String menuAuthorities = menuVOS.stream().map(MenuVO::getPermission).collect(Collectors.joining(","));
-
-                authorities.append(menuAuthorities);
-            }
-        }
-
-        return authorities.toString();
-    }
-
     @Override
     public Result pageUsers(UserQuery userQuery) {
         LambdaQueryWrapper<UserDO> userQueryWrapper = new LambdaQueryWrapper<>();
@@ -124,9 +65,20 @@ public class UserServiceImpl implements UserService {
                 .like(CommonUtil.isNotBlank(userQuery.getUsername()), UserDO::getUsername, userQuery.getUsername());
 
         Page<UserDO> page = new Page<>(userQuery.getCurrentPage(), userQuery.getPageSize());
-        Page<UserDO> userPage = userDAO.selectPage(page, userQueryWrapper);
+        Page<UserDO> userDOPage = userDAO.selectPage(page, userQueryWrapper);
 
-        return Result.success("查询用户列表成功", systemMapStruct.pageUserDOToDO(userPage));
+        Page<UserVO> userVOPage = systemMapStruct.pageUserDOToDO(userDOPage);
+
+        for (UserVO userVO : userVOPage.getRecords()) {
+            List<UserRoleBO> userRoleBOS = userRoleService.listUserRoles(UserRoleQuery.builder().userId(userVO.getId()).build());
+            List<String> roleIds = userRoleBOS.stream().map(UserRoleBO::getRoleId).collect(Collectors.toList());
+
+            List<RoleVO> roleVOS = CommonUtil.castToList(roleService.listRoles(RoleQuery.builder().roleIds(roleIds).build()).getData(), RoleVO.class);
+            userVO.setRoleIds(roleVOS.stream().map(RoleVO::getId).collect(Collectors.toList()));
+            userVO.setRoleNames(roleVOS.stream().map(RoleVO::getName).collect(Collectors.toList()));
+        }
+
+        return Result.success("查询用户列表成功", userVOPage);
     }
 
     /**
@@ -173,7 +125,9 @@ public class UserServiceImpl implements UserService {
 
         UserDO userDO = systemMapStruct.userCommandToDO(userCommand);
 
-        userDO.setPassword(passwordEncoder.encode(userDO.getPassword()));
+        if (CommonUtil.isNotBlank(userCommand.getPassword())) {
+            userDO.setPassword(passwordEncoder.encode(userDO.getPassword()));
+        }
         userDO.setUpdateTime(Timestamp.valueOf(LocalDateTime.now()));
         return Result.success("修改用户成功", userDAO.updateById(userDO));
     }

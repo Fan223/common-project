@@ -2,17 +2,21 @@ package fan.utils;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import fan.bo.UserBO;
+import fan.bo.UserRoleBO;
 import fan.command.MenuCommand;
 import fan.command.RoleCommand;
 import fan.command.UserCommand;
 import fan.entity.MenuDO;
 import fan.entity.RoleDO;
 import fan.entity.UserDO;
+import fan.entity.UserRoleDO;
 import fan.vo.MenuVO;
 import fan.vo.RoleVO;
 import fan.vo.UserVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+
+import java.util.List;
 
 /**
  * 系统管理转换类
@@ -43,4 +47,8 @@ public interface SystemMapStruct {
     Page<UserVO> pageUserDOToDO(Page<UserDO> userDOPage);
 
     UserDO userCommandToDO(UserCommand userCommand);
+
+    UserRoleBO UserRoleDOToBO(UserRoleDO userRoleDO);
+
+    List<UserRoleBO> userRoleDOSToBOs(List<UserRoleDO> userRoleDOS);
 }

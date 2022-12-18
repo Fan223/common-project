@@ -43,7 +43,6 @@ public class AuthUtil {
         // 首先, 获取 x-forwarded-for 中的 IP 地址, 它在 HTTP 扩展协议中能表示真实的客户端 IP
         String ipAddress = request.getHeader("X-Forwarded-For");
         if (CommonUtil.isNotBlank(ipAddress) && !"unknown".equalsIgnoreCase(ipAddress)) {
-            LogUtil.info("x-forwarded-for");
             // 多次反向代理后会有多个 ip 值, 第一个 ip 才是真实 ip, 例: X-Forwarded-For: client, proxy1, proxy2, proxy…
             int index = ipAddress.indexOf(",");
             if (index != -1) {

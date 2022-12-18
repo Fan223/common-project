@@ -2,6 +2,7 @@ package fan.service.impl;
 
 import fan.bo.UserBO;
 import fan.query.UserQuery;
+import fan.service.SystemService;
 import fan.service.UserService;
 import fan.utils.CommonUtil;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -26,6 +27,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Resource
     private UserService userService;
 
+    @Resource
+    private SystemService systemService;
+
     /**
      * 根据用户名从数据库获取用户信息和用户权限信息, 校验用户
      *
@@ -44,7 +48,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         // 查询用户权限信息
         List<GrantedAuthority> grantedAuthorities = AuthorityUtils.commaSeparatedStringToAuthorityList(
-                userService.getAuthorities(userBO.getId()));
+                systemService.getAuthorities(userBO.getId()));
 
         return new UserDetailsImpl(userBO, grantedAuthorities);
     }

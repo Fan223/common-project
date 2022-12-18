@@ -5,8 +5,6 @@ import fan.command.UserCommand;
 import fan.query.UserQuery;
 import fan.utils.Result;
 
-import java.util.List;
-
 /**
  * 用户接口
  *
@@ -24,16 +22,6 @@ public interface UserService {
      * @since 2022/11/25 16:43
      */
     UserBO getUser(UserQuery userQuery);
-
-    /**
-     * 通过用户 ID 先从 Redis 获取权限, 假如 Redis 不存在则从数据库查询并存入 Redis
-     *
-     * @param userId 用户ID
-     * @return {@link String}
-     * @author Fan
-     * @since 2022/11/27 6:30
-     */
-    String getAuthorities(String userId);
 
     /**
      * 获取用户分页列表

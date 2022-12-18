@@ -1,5 +1,6 @@
 package fan.service;
 
+import fan.bo.UserRoleBO;
 import fan.command.UserRoleCommand;
 import fan.query.UserRoleQuery;
 import fan.utils.Result;
@@ -15,14 +16,14 @@ import java.util.List;
 public interface UserRoleService {
 
     /**
-     * 获取角色 ID 列表
+     * 获取用户角色列表
      *
      * @param userRoleQuery 用户角色查询参数
      * @return {@link List<String>}
      * @author Fan
      * @since 2022/11/25 14:18
      */
-    List<String> listRoleIds(UserRoleQuery userRoleQuery);
+    List<UserRoleBO> listUserRoles(UserRoleQuery userRoleQuery);
 
     /**
      * 删除用户角色
@@ -54,16 +55,6 @@ public interface UserRoleService {
      * @since 2022/12/11 6:35
      */
     Result assignRoles(String userId, UserRoleCommand userRoleCommand);
-
-    /**
-     * 获取用户 ID 列表
-     *
-     * @param userRoleQuery 用户角色查询参数
-     * @return {@link List<String>}
-     * @author Fan
-     * @since 2022/12/15 22:20
-     */
-    List<String> listUserIds(UserRoleQuery userRoleQuery);
 
     /**
      * 更新用户角色
