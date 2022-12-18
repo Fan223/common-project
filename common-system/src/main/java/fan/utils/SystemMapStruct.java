@@ -44,7 +44,7 @@ public interface SystemMapStruct {
     @Mapping(target = "createTime", source = "createTime", qualifiedByName = "stampToString")
     UserVO userDOToVO(UserDO userDO);
 
-    Page<UserVO> pageUserDOToDO(Page<UserDO> userDOPage);
+    Page<UserVO> pageUserDOToVO(Page<UserDO> userDOPage);
 
     UserDO userCommandToDO(UserCommand userCommand);
 

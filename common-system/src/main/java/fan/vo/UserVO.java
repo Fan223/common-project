@@ -3,6 +3,7 @@ package fan.vo;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,7 +27,7 @@ public class UserVO implements Serializable {
     private List<String> roleIds;
 
     // 角色名称列表
-    private List<String> roleNames;
+    private List<String> roleNames = new ArrayList<>();
 
     // 头像
     private String avatar;

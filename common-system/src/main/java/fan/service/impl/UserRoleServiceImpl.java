@@ -43,6 +43,7 @@ public class UserRoleServiceImpl implements UserRoleService {
         userRoleQueryWrapper.eq(CommonUtil.isNotBlank(userRoleQuery.getUserId()), UserRoleDO::getUserId, userRoleQuery.getUserId())
                 .eq(CommonUtil.isNotBlank(userRoleQuery.getRoleId()), UserRoleDO::getRoleId, userRoleQuery.getRoleId())
                 .eq(CommonUtil.isNotBlank(userRoleQuery.getFlag()), UserRoleDO::getFlag, userRoleQuery.getFlag())
+                .in(CommonUtil.isNotBlank(userRoleQuery.getUserIds()), UserRoleDO::getUserId, userRoleQuery.getUserIds())
                 .in(CommonUtil.isNotBlank(userRoleQuery.getRoleIds()), UserRoleDO::getRoleId, userRoleQuery.getRoleIds());
 
         List<UserRoleDO> userRoleDOS = userRoleDAO.selectList(userRoleQueryWrapper);

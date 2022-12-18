@@ -145,9 +145,12 @@ public class SystemServeImpl implements SystemService {
     public void clearAuthoritiesByRole(SystemCommand systemCommand) {
         List<UserRoleBO> userRoleBOS = userRoleService.listUserRoles(UserRoleQuery.builder().roleId(systemCommand.getRoleId())
                 .roleIds(systemCommand.getRoleIds()).build());
-        List<String> userIds = userRoleBOS.stream().map(UserRoleBO::getUserId).collect(Collectors.toList());
 
-        List<String> keys = userIds.stream().map(userId -> SystemConst.AUTHENTICATION + ":" + userId).collect(Collectors.toList());
-        RedisUtil.del(keys);
+        if (CommonUtil.isNotBlank(userRoleBOS)) {
+            List<String> userIds = userRoleBOS.stream().map(UserRoleBO::getUserId).collect(Collectors.toList());
+
+            List<String> keys = userIds.stream().map(userId -> SystemConst.AUTHENTICATION + ":" + userId).collect(Collectors.toList());
+            RedisUtil.del(keys);
+        }
     }
 }

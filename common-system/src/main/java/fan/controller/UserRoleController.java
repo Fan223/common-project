@@ -1,16 +1,12 @@
 package fan.controller;
 
-import fan.bo.UserRoleBO;
 import fan.command.UserRoleCommand;
-import fan.query.UserRoleQuery;
 import fan.service.UserRoleService;
 import fan.utils.Result;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 用户角色关联Controller
@@ -24,23 +20,6 @@ public class UserRoleController {
 
     @Resource
     private UserRoleService userRoleService;
-
-    /**
-     * 通过用户 ID 获取角色列表
-     *
-     * @param userId 用户ID
-     * @return {@link Result}
-     * @author Fan
-     * @since 2022/12/11 6:35
-     */
-    @PreAuthorize("hasAnyAuthority('userRole:assignRole')")
-    @GetMapping("/listRoleIds/{userId}")
-    public Result listRoleIds(@PathVariable("userId") String userId, UserRoleQuery userRoleQuery) {
-        userRoleQuery.setUserId(userId);
-
-        List<UserRoleBO> userRoleBOS = userRoleService.listUserRoles(userRoleQuery);
-        return Result.success("获取角色列表成功", userRoleBOS.stream().map(UserRoleBO::getRoleId).collect(Collectors.toList()));
-    }
 
     /**
      * 分配角色

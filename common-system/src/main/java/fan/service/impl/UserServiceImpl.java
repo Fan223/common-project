@@ -22,6 +22,7 @@ import javax.annotation.Resource;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -67,15 +68,22 @@ public class UserServiceImpl implements UserService {
         Page<UserDO> page = new Page<>(userQuery.getCurrentPage(), userQuery.getPageSize());
         Page<UserDO> userDOPage = userDAO.selectPage(page, userQueryWrapper);
 
-        Page<UserVO> userVOPage = systemMapStruct.pageUserDOToDO(userDOPage);
+        List<String> userIds = userDOPage.getRecords().stream().map(UserDO::getId).collect(Collectors.toList());
+        List<UserRoleBO> userRoleBOS = userRoleService.listUserRoles(UserRoleQuery.builder().userIds(userIds).build());
 
+        Map<String, List<UserRoleBO>> userRoleBOMap = userRoleBOS.stream().collect(Collectors.groupingBy(UserRoleBO::getUserId));
+        List<String> roleIds = userRoleBOS.stream().map(UserRoleBO::getRoleId).collect(Collectors.toList());
+        List<RoleVO> roleVOS = CommonUtil.castToList(roleService.listRoles(RoleQuery.builder().roleIds(roleIds).build()).getData(), RoleVO.class);
+
+        Page<UserVO> userVOPage = systemMapStruct.pageUserDOToVO(userDOPage);
         for (UserVO userVO : userVOPage.getRecords()) {
-            List<UserRoleBO> userRoleBOS = userRoleService.listUserRoles(UserRoleQuery.builder().userId(userVO.getId()).build());
-            List<String> roleIds = userRoleBOS.stream().map(UserRoleBO::getRoleId).collect(Collectors.toList());
-
-            List<RoleVO> roleVOS = CommonUtil.castToList(roleService.listRoles(RoleQuery.builder().roleIds(roleIds).build()).getData(), RoleVO.class);
-            userVO.setRoleIds(roleVOS.stream().map(RoleVO::getId).collect(Collectors.toList()));
-            userVO.setRoleNames(roleVOS.stream().map(RoleVO::getName).collect(Collectors.toList()));
+            List<String> tempRoleIds = userRoleBOMap.get(userVO.getId()).stream().map(UserRoleBO::getRoleId).collect(Collectors.toList());
+            userVO.setRoleIds(tempRoleIds);
+            for (RoleVO roleVO : roleVOS) {
+                if (tempRoleIds.contains(roleVO.getId())) {
+                    userVO.getRoleNames().add(roleVO.getName());
+                }
+            }
         }
 
         return Result.success("查询用户列表成功", userVOPage);

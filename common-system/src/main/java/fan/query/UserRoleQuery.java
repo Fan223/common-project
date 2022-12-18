@@ -18,6 +18,9 @@ public class UserRoleQuery {
     // 用户ID
     private String userId;
 
+    // 用户 ID 列表
+    private List<String> userIds;
+
     // 有效标志
     private String flag;
 
