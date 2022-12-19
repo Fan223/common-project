@@ -3,19 +3,25 @@ package fan.vo;
 import lombok.Data;
 
 /**
- * 登录地理信息展示类
+ * 登录信息展示类
  *
  * @author Fan
  * @since 2022/12/14 16:57
  */
 @Data
-public class LoginGeoVO {
+public class LoginInfoVO {
 
     // 用户名
     private String username;
 
     // IP 地址
     private String ipAddress;
+
+    // 操作系统
+    private String operateSystem;
+
+    // 浏览器
+    private String browser;
 
     // 国家中文名称
     private String countryZhCnName;

@@ -1,9 +1,10 @@
 package fan.hander;
 
 import cn.hutool.json.JSONUtil;
+import eu.bitwalker.useragentutils.UserAgent;
 import fan.consts.AuthConst;
-import fan.entity.LoginGeoDO;
-import fan.service.LoginGeoService;
+import fan.entity.LoginInfoDO;
+import fan.service.LoginInfoService;
 import fan.service.impl.UserDetailsImpl;
 import fan.utils.*;
 import org.springframework.security.core.Authentication;
@@ -27,7 +28,7 @@ import java.nio.charset.StandardCharsets;
 public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     @Resource
-    private LoginGeoService loginGeoService;
+    private LoginInfoService loginInfoService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
@@ -50,18 +51,25 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         // 通过 request 请求获取 IP 地址
         String ipAddress = AuthUtil.getIpAddress(request);
         // 通过 IP 地址获取地理信息
-        LoginGeoDO loginGeoDO = AuthUtil.getGeoInformation(ipAddress);
+        LoginInfoDO loginInfoDO = AuthUtil.getGeoInformation(ipAddress);
+
+        // 获取操作系统和浏览器信息
+        String ua = request.getHeader("User-Agent");
+        UserAgent userAgent = UserAgent.parseUserAgentString(ua);
+
+        loginInfoDO.setOperateSystem(userAgent.getOperatingSystem().getName());
+        loginInfoDO.setBrowser(userAgent.getBrowser().getName());
 
         // 获取真实用户名
         String realUserName = ((UserDetailsImpl) authentication.getPrincipal()).getRealUsername();
-        loginGeoDO.setUsername(realUserName);
+        loginInfoDO.setUsername(realUserName);
 
         // 判断登录用户信息是否存在
-        LoginGeoDO loginGeo = loginGeoService.getLoginGeo(realUserName);
-        if (CommonUtil.isBlank(loginGeo)) {
-            loginGeoService.addLoginGeo(loginGeoDO);
+        LoginInfoDO loginInfo = loginInfoService.getLoginInfo(realUserName);
+        if (CommonUtil.isBlank(loginInfo)) {
+            loginInfoService.addLoginInfo(loginInfoDO);
         } else {
-            loginGeoService.updateLoginGeo(loginGeoDO);
+            loginInfoService.updateLoginInfo(loginInfoDO);
         }
     }
 }

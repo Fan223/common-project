@@ -1,8 +1,8 @@
 package fan.utils;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import fan.entity.LoginGeoDO;
-import fan.vo.LoginGeoVO;
+import fan.entity.LoginInfoDO;
+import fan.vo.LoginInfoVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -16,7 +16,7 @@ import org.mapstruct.Mapping;
 public interface AuthMapStruct {
 
     @Mapping(target = "updateTime", source = "updateTime", qualifiedByName = "stampToString")
-    LoginGeoVO LoginGeoDOToVO(LoginGeoDO loginGeoDO);
+    LoginInfoVO LoginInfoDOToVO(LoginInfoDO loginInfoDO);
 
-    Page<LoginGeoVO> pageLoginGeoDOToVO(Page<LoginGeoDO> loginGeoDOPage);
+    Page<LoginInfoVO> pageLoginInfoDOToVO(Page<LoginInfoDO> loginGeoDOPage);
 }

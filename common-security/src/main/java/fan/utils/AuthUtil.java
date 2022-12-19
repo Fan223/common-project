@@ -4,7 +4,7 @@ import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.CityResponse;
 import com.maxmind.geoip2.record.*;
-import fan.entity.LoginGeoDO;
+import fan.entity.LoginInfoDO;
 import org.springframework.core.io.ClassPathResource;
 
 import javax.servlet.http.HttpServletRequest;
@@ -82,13 +82,13 @@ public class AuthUtil {
      * 通过 IP 地址获取地理信息
      *
      * @param ipAddress IP地址
-     * @return {@link LoginGeoDO}
+     * @return {@link LoginInfoDO}
      * @author Fan
      * @since 2022/12/14 16:35
      */
-    public static LoginGeoDO getGeoInformation(String ipAddress) {
-        LoginGeoDO loginGeoDO = new LoginGeoDO();
-        loginGeoDO.setIpAddress(ipAddress);
+    public static LoginInfoDO getGeoInformation(String ipAddress) {
+        LoginInfoDO loginInfoDO = new LoginInfoDO();
+        loginInfoDO.setIpAddress(ipAddress);
 
         try {
             // 获取 IP 地址信息
@@ -98,34 +98,34 @@ public class AuthUtil {
 
             // 国家信息
             Country country = response.getCountry();
-            loginGeoDO.setCountryIsoCode(country.getIsoCode());
-            loginGeoDO.setCountryName(country.getName());
-            loginGeoDO.setCountryZhCnName(country.getNames().get("zh-CN"));
+            loginInfoDO.setCountryIsoCode(country.getIsoCode());
+            loginInfoDO.setCountryName(country.getName());
+            loginInfoDO.setCountryZhCnName(country.getNames().get("zh-CN"));
 
             // 省级信息
             Subdivision subdivision = response.getMostSpecificSubdivision();
-            loginGeoDO.setSubdivisionIsoCode(subdivision.getIsoCode());
-            loginGeoDO.setSubdivisionName(subdivision.getName());
-            loginGeoDO.setSubdivisionZhCnName(subdivision.getNames().get("zh-CN"));
+            loginInfoDO.setSubdivisionIsoCode(subdivision.getIsoCode());
+            loginInfoDO.setSubdivisionName(subdivision.getName());
+            loginInfoDO.setSubdivisionZhCnName(subdivision.getNames().get("zh-CN"));
 
             // 城市信息
             City city = response.getCity();
-            loginGeoDO.setCityName(city.getName());
-            loginGeoDO.setCityZhCnName(city.getNames().get("zh-CN"));
+            loginInfoDO.setCityName(city.getName());
+            loginInfoDO.setCityZhCnName(city.getNames().get("zh-CN"));
 
             // 邮政编码(国内的可能获取不到)
             Postal postal = response.getPostal();
-            loginGeoDO.setPostal(postal.getCode());
+            loginInfoDO.setPostal(postal.getCode());
 
             // 经纬度
             Location location = response.getLocation();
-            loginGeoDO.setLatitude(location.getLatitude());
-            loginGeoDO.setLongitude(location.getLongitude());
+            loginInfoDO.setLatitude(location.getLatitude());
+            loginInfoDO.setLongitude(location.getLongitude());
 
-            return loginGeoDO;
+            return loginInfoDO;
         } catch (IOException | GeoIp2Exception exception) {
             LogUtil.error(exception.getMessage());
-            return loginGeoDO;
+            return loginInfoDO;
         }
     }
 }

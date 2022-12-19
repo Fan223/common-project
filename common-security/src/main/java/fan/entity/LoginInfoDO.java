@@ -7,14 +7,14 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 
 /**
- * 登录地理信息实体类
+ * 登录信息实体类
  *
  * @author Fan
  * @since 2022/12/14 15:47
  */
-@TableName("login_geo")
+@TableName("login_info")
 @Data
-public class LoginGeoDO implements Serializable {
+public class LoginInfoDO implements Serializable {
 
     private static final long serialVersionUID = -1L;
 
@@ -23,6 +23,12 @@ public class LoginGeoDO implements Serializable {
 
     // 用户名
     private String username;
+
+    // 操作系统
+    private String operateSystem;
+
+    // 浏览器
+    private String browser;
 
     // IP 地址
     private String ipAddress;
