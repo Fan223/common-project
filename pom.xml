@@ -22,4 +22,32 @@
     <modelVersion>4.0.0</modelVersion>
     <name>common-project</name>
     <description>common-project</description>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>fan</groupId>
+                <artifactId>common-base</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>fan</groupId>
+                <artifactId>common-security</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>fan</groupId>
+                <artifactId>common-system</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>fan</groupId>
+                <artifactId>common-web</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>
