@@ -18,4 +18,7 @@ public class UserQuery extends BaseQuery {
 
     // 有效标志
     private String flag;
+
+    // 用户ID
+    private String userId;
 }

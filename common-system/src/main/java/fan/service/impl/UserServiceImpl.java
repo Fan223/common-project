@@ -52,7 +52,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserBO getUser(UserQuery userQuery) {
         LambdaQueryWrapper<UserDO> userQueryWrapper = new LambdaQueryWrapper<>();
-        userQueryWrapper.eq(CommonUtil.isNotBlank(userQuery.getUsername()), UserDO::getUsername, userQuery.getUsername())
+        userQueryWrapper.eq(CommonUtil.isNotBlank(userQuery.getUserId()), UserDO::getId, userQuery.getUserId())
+                .eq(CommonUtil.isNotBlank(userQuery.getUsername()), UserDO::getUsername, userQuery.getUsername())
                 .eq(CommonUtil.isNotBlank(userQuery.getFlag()), UserDO::getFlag, userQuery.getFlag());
 
         UserDO userDO = userDAO.selectOne(userQueryWrapper);
@@ -89,24 +90,11 @@ public class UserServiceImpl implements UserService {
         return Result.success("查询用户列表成功", userVOPage);
     }
 
-    /**
-     * 通过用户名验证用户是否存在
-     *
-     * @param username 用户名
-     * @return {@link boolean}
-     * @author Fan
-     * @since 2022/12/16 1:27
-     */
-    private boolean validateUser(String username) {
-        UserBO userBO = getUser(UserQuery.builder().username(username).flag("Y").build());
-
-        return CommonUtil.isNotBlank(userBO);
-    }
-
     @Transactional
     @Override
     public Result addUser(UserCommand userCommand) {
-        if (validateUser(userCommand.getUsername())) {
+        UserBO userBO = getUser(UserQuery.builder().username(userCommand.getUsername()).build());
+        if (CommonUtil.isNotBlank(userBO)) {
             return Result.fail("用户名已存在, 请重新输入新的用户名", null);
         }
 
@@ -127,7 +115,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Result updateUser(UserCommand userCommand) {
-        if (validateUser(userCommand.getUsername())) {
+        UserBO userBO = getUser(UserQuery.builder().username(userCommand.getUsername()).build());
+        if (CommonUtil.isNotBlank(userBO) && !userBO.getId().equals(userCommand.getId())) {
             return Result.fail("用户名已存在, 请重新输入新的用户名", null);
         }
 

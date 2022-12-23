@@ -9,7 +9,7 @@ import fan.utils.JwtUtil;
 import fan.utils.LogUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -41,13 +41,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Resource
     private UnAuthenticationEntryPoint unAuthenticationEntryPoint;
 
+    @Value("${server.servlet.context-path}")
+    private String contextPath;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull FilterChain filterChain) throws ServletException, IOException {
         LogUtil.info("JwtAuthenticationFilter-JWT 过滤器");
 
         // 登录/登出请求或 Api 请求不需要检验JWT
-        if (request.getRequestURI().startsWith("/resNav/api") || request.getRequestURI().startsWith("/resNav/logout") ||
-                (request.getRequestURI().equals("/resNav/login") && request.getMethod().equals("POST"))) {
+        if (request.getRequestURI().startsWith(contextPath + "/api") || request.getRequestURI().startsWith(contextPath + "/logout") ||
+                (request.getRequestURI().equals(contextPath + "/login") && request.getMethod().equals("POST"))) {
 
             filterChain.doFilter(request, response);
             return;
