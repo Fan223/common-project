@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -88,7 +89,7 @@ public class SystemServeImpl implements SystemService {
 
             if (null != menuIds) {
                 // 通过获取到的菜单 ID 列表查询对应的菜单信息, 包含全部类型菜单
-                List<Integer> menuTypes = MenuTypeEnum.getTypeValues(ListUtil.transToList("目录", "菜单", "按钮"));
+                List<Integer> menuTypes = MenuTypeEnum.getTypeValues(Arrays.asList("目录", "菜单", "按钮"));
                 List<MenuVO> menuVOS = menuService.listMenus(MenuQuery.builder().flag("Y").type(menuTypes).menuIds(menuIds).build());
                 String menuAuthorities = menuVOS.stream().map(MenuVO::getPermission).collect(Collectors.joining(","));
 

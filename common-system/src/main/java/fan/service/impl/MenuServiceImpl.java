@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -82,7 +83,7 @@ public class MenuServiceImpl implements MenuService {
 
             if (null != menuIds) {
                 // 通过获取到的菜单 ID 列表查询对应的菜单信息, 只包括目录和菜单类型的菜单, 不包括按钮
-                List<Integer> menuTypes = MenuTypeEnum.getTypeValues(ListUtil.transToList("目录", "菜单"));
+                List<Integer> menuTypes = MenuTypeEnum.getTypeValues(Arrays.asList("目录", "菜单"));
                 List<MenuVO> menuVOS = listMenus(MenuQuery.builder().flag("Y").menuIds(menuIds).type(menuTypes).build());
                 navMenuVOS = SystemUtil.buildTree(menuVOS);
 
