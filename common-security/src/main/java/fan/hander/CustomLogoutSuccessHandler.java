@@ -2,10 +2,10 @@ package fan.hander;
 
 import cn.hutool.json.JSONUtil;
 import fan.consts.AuthConst;
-import fan.utils.CommonUtil;
+
 import fan.utils.LogUtil;
 import fan.utils.RedisUtil;
-import fan.utils.Result;
+import fan.base.Response;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -39,7 +39,7 @@ public class CustomLogoutSuccessHandler implements LogoutSuccessHandler {
         // 返回响应信息
         response.setContentType("application/json;charset=utf-8");
         ServletOutputStream outputStream = response.getOutputStream();
-        Result success = Result.success("注销成功", "CustomLogoutSuccessHandler");
+        Response success = Response.success("注销成功", "CustomLogoutSuccessHandler");
         outputStream.write(JSONUtil.toJsonStr(success).getBytes(StandardCharsets.UTF_8));
 
         // 关闭流

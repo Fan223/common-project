@@ -2,6 +2,7 @@ package fan.hander;
 
 import cn.hutool.json.JSONUtil;
 import eu.bitwalker.useragentutils.UserAgent;
+import fan.base.Response;
 import fan.consts.AuthConst;
 import fan.entity.LoginInfoDO;
 import fan.service.LoginInfoService;
@@ -41,7 +42,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         // 返回响应信息
         response.setContentType("application/json;charset=utf-8");
         ServletOutputStream outputStream = response.getOutputStream();
-        Result success = Result.success("登录成功", "successHandler");
+        Response success = Response.success("登录成功", "successHandler");
         outputStream.write(JSONUtil.toJsonStr(success).getBytes(StandardCharsets.UTF_8));
 
         // 关闭流
@@ -66,7 +67,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         // 判断登录用户信息是否存在
         LoginInfoDO loginInfo = loginInfoService.getLoginInfo(realUserName);
-        if (CommonUtil.isBlank(loginInfo)) {
+        if (null == loginInfo) {
             loginInfoService.addLoginInfo(loginInfoDO);
         } else {
             loginInfoService.updateLoginInfo(loginInfoDO);

@@ -2,7 +2,7 @@ package fan.service;
 
 import fan.command.RoleMenuCommand;
 import fan.query.RoleMenuQuery;
-import fan.utils.Result;
+import fan.base.Response;
 
 import java.util.List;
 
@@ -39,11 +39,11 @@ public interface RoleMenuService {
      *
      * @param roleId          角色ID
      * @param roleMenuCommand 角色菜单更新参数
-     * @return {@link Result}
+     * @return {@link Response}
      * @author Fan
      * @since 2022/12/1 11:30
      */
-    Result assignPermissions(String roleId, RoleMenuCommand roleMenuCommand);
+    Response assignPermissions(String roleId, RoleMenuCommand roleMenuCommand);
 
     /**
      * 通过菜单 ID 获取角色 ID 列表

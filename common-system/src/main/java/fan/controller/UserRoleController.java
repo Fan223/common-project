@@ -2,7 +2,7 @@ package fan.controller;
 
 import fan.command.UserRoleCommand;
 import fan.service.UserRoleService;
-import fan.utils.Result;
+import fan.base.Response;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,13 +26,13 @@ public class UserRoleController {
      *
      * @param userId          用户ID
      * @param userRoleCommand 用户角色更新参数
-     * @return {@link Result}
+     * @return {@link Response}
      * @author Fan
      * @since 2022/12/11 6:36
      */
     @PreAuthorize("hasAnyAuthority('userRole:assignRole')")
     @PostMapping("/assignRoles/{userId}")
-    public Result assignRoles(@PathVariable("userId") String userId,
+    public Response assignRoles(@PathVariable("userId") String userId,
                               @RequestBody UserRoleCommand userRoleCommand) {
         return userRoleService.assignRoles(userId, userRoleCommand);
     }

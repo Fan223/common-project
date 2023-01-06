@@ -2,7 +2,7 @@ package fan.hander;
 
 import cn.hutool.json.JSONUtil;
 import fan.utils.LogUtil;
-import fan.utils.Result;
+import fan.base.Response;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
@@ -32,7 +32,7 @@ public class UnAccessDeniedHandler implements AccessDeniedHandler {
 
         // 返回响应信息
         ServletOutputStream outputStream = response.getOutputStream();
-        Result fail = Result.fail(HttpServletResponse.SC_FORBIDDEN, "未授权, 不允许访问", "UnAccessDeniedHandler");
+        Response fail = Response.fail(HttpServletResponse.SC_FORBIDDEN, "未授权, 不允许访问", "UnAccessDeniedHandler");
         outputStream.write(JSONUtil.toJsonStr(fail).getBytes(StandardCharsets.UTF_8));
 
         // 关闭流

@@ -1,5 +1,6 @@
 package fan.utils;
 
+import fan.utils.collection.StringUtil;
 import org.mapstruct.Named;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +26,7 @@ public class MapStructRule {
      */
     @Named("stampToString")
     public String stampToString(Timestamp timestamp) {
-        if (CommonUtil.isBlank(timestamp)) {
+        if (null == timestamp) {
             return "时间为空";
         }
 

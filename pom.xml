@@ -11,7 +11,6 @@
     <version>0.0.1-SNAPSHOT</version>
 
     <modules>
-        <module>common-base</module>
         <module>common-security</module>
         <module>common-system</module>
         <module>common-web</module>
@@ -25,12 +24,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>fan</groupId>
-                <artifactId>common-base</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
-            </dependency>
-
             <dependency>
                 <groupId>fan</groupId>
                 <artifactId>common-security</artifactId>

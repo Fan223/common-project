@@ -5,6 +5,7 @@ import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.CityResponse;
 import com.maxmind.geoip2.record.*;
 import fan.entity.LoginInfoDO;
+import fan.utils.collection.StringUtil;
 import org.springframework.core.io.ClassPathResource;
 
 import javax.servlet.http.HttpServletRequest;
@@ -42,7 +43,7 @@ public class AuthUtil {
     public static String getIpAddress(HttpServletRequest request) {
         // 首先, 获取 x-forwarded-for 中的 IP 地址, 它在 HTTP 扩展协议中能表示真实的客户端 IP
         String ipAddress = request.getHeader("X-Forwarded-For");
-        if (CommonUtil.isNotBlank(ipAddress) && !"unknown".equalsIgnoreCase(ipAddress)) {
+        if (StringUtil.isNotBlank(ipAddress) && !"unknown".equalsIgnoreCase(ipAddress)) {
             // 多次反向代理后会有多个 ip 值, 第一个 ip 才是真实 ip, 例: X-Forwarded-For: client, proxy1, proxy2, proxy…
             int index = ipAddress.indexOf(",");
             if (index != -1) {
@@ -54,23 +55,23 @@ public class AuthUtil {
 
         // 如果 X-Forwarded-For 获取不到, 就去获取 X-Real-IP
         ipAddress = request.getHeader("X-Real-IP");
-        if (CommonUtil.isBlank(ipAddress) || "unknown".equalsIgnoreCase(ipAddress)) {
+        if (StringUtil.isBlank(ipAddress) || "unknown".equalsIgnoreCase(ipAddress)) {
             // 如果 X-Real-IP 获取不到, 就去获取 Proxy-Client-IP
             ipAddress = request.getHeader("Proxy-Client-IP");
         }
-        if (CommonUtil.isBlank(ipAddress) || "unknown".equalsIgnoreCase(ipAddress)) {
+        if (StringUtil.isBlank(ipAddress) || "unknown".equalsIgnoreCase(ipAddress)) {
             // 如果 Proxy-Client-IP 获取不到, 就去获取 WL-Proxy-Client-IP
             ipAddress = request.getHeader("WL-Proxy-Client-IP");
         }
-        if (CommonUtil.isBlank(ipAddress) || "unknown".equalsIgnoreCase(ipAddress)) {
+        if (StringUtil.isBlank(ipAddress) || "unknown".equalsIgnoreCase(ipAddress)) {
             // 如果 WL-Proxy-Client-IP 获取不到, 就去获取 HTTP_CLIENT_IP
             ipAddress = request.getHeader("HTTP_CLIENT_IP");
         }
-        if (CommonUtil.isBlank(ipAddress) || "unknown".equalsIgnoreCase(ipAddress)) {
+        if (StringUtil.isBlank(ipAddress) || "unknown".equalsIgnoreCase(ipAddress)) {
             // 如果 HTTP_CLIENT_IP 获取不到, 就去获取 HTTP_X_FORWARDED_FOR
             ipAddress = request.getHeader("HTTP_X_FORWARDED_FOR");
         }
-        if (CommonUtil.isBlank(ipAddress) || "unknown".equalsIgnoreCase(ipAddress)) {
+        if (StringUtil.isBlank(ipAddress) || "unknown".equalsIgnoreCase(ipAddress)) {
             // 都获取不到, 最后才通过 request.getRemoteAddr() 获取IP
             ipAddress = request.getRemoteAddr();
         }

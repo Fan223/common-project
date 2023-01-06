@@ -4,7 +4,7 @@ import fan.bo.UserBO;
 import fan.query.UserQuery;
 import fan.service.SystemService;
 import fan.service.UserService;
-import fan.utils.CommonUtil;
+
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -42,7 +42,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) {
         // 查询用户信息
         UserBO userBO = userService.getUser(UserQuery.builder().flag("Y").username(username).build());
-        if (CommonUtil.isBlank(userBO)) {
+        if (null == userBO) {
             throw new InternalAuthenticationServiceException("用户名不存在");
         }
 

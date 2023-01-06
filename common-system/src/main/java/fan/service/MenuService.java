@@ -2,7 +2,7 @@ package fan.service;
 
 import fan.command.MenuCommand;
 import fan.query.MenuQuery;
-import fan.utils.Result;
+import fan.base.Response;
 import fan.vo.MenuVO;
 
 import java.util.List;
@@ -39,11 +39,11 @@ public interface MenuService {
      * 获取菜单树形列表
      *
      * @param menuQuery 菜单查询参数
-     * @return {@link Result}
+     * @return {@link Response}
      * @author Fan
      * @since 2022/12/2 14:06
      */
-    Result listMenusTree(MenuQuery menuQuery);
+    Response listMenusTree(MenuQuery menuQuery);
 
     /**
      * 添加菜单
@@ -53,25 +53,25 @@ public interface MenuService {
      * @author Fan
      * @since 2022/11/29 15:51
      */
-    Result addMenu(MenuCommand menuCommand);
+    Response addMenu(MenuCommand menuCommand);
 
     /**
      * 修改菜单
      *
      * @param menuCommand 菜单更新参数
-     * @return {@link Result}
+     * @return {@link Response}
      * @author Fan
      * @since 2022/12/1 11:07
      */
-    Result updateMenu(MenuCommand menuCommand);
+    Response updateMenu(MenuCommand menuCommand);
 
     /**
      * 删除菜单
      *
      * @param menuCommand 菜单更新参数
-     * @return {@link Result}
+     * @return {@link Response}
      * @author Fan
      * @since 2022/12/1 11:07
      */
-    Result deleteMenu(MenuCommand menuCommand);
+    Response deleteMenu(MenuCommand menuCommand);
 }

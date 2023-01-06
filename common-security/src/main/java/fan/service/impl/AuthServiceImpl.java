@@ -10,7 +10,7 @@ import fan.service.AuthService;
 import fan.utils.AuthUtil;
 import org.springframework.stereotype.Service;
 import fan.utils.RedisUtil;
-import fan.utils.Result;
+import fan.base.Response;
 
 import javax.annotation.Resource;
 import javax.imageio.ImageIO;
@@ -32,7 +32,7 @@ public class AuthServiceImpl implements AuthService {
     private Producer producer;
 
     @Override
-    public Result getCaptcha(HttpServletRequest request) {
+    public Response getCaptcha(HttpServletRequest request) {
         // 生成验证码字符串
         String captchaStr = producer.createText();
 
@@ -53,7 +53,7 @@ public class AuthServiceImpl implements AuthService {
         // 将验证码存入 Redis, 过期时间为2分钟
         RedisUtil.hashSet(AuthConst.CAPTCHA_KEY + ":" + ipAddress, loginToken, captchaStr, AuthConst.CAPTCHA_EXPIRE_TIME);
 
-        return Result.success("生成验证码成功", MapUtil.builder().put("loginToken", loginToken)
+        return Response.success("生成验证码成功", MapUtil.builder().put("loginToken", loginToken)
                 .put("captchaImg", captchaImg).build());
     }
 }

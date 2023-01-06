@@ -3,6 +3,7 @@ package fan.service.impl;
 import cn.hutool.core.lang.UUID;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import fan.base.Response;
 import fan.bo.UserBO;
 import fan.bo.UserRoleBO;
 import fan.command.UserCommand;
@@ -12,6 +13,8 @@ import fan.entity.UserDO;
 import fan.query.*;
 import fan.service.*;
 import fan.utils.*;
+import fan.utils.collection.ListUtil;
+import fan.utils.collection.StringUtil;
 import fan.vo.RoleVO;
 import fan.vo.UserVO;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -52,19 +55,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserBO getUser(UserQuery userQuery) {
         LambdaQueryWrapper<UserDO> userQueryWrapper = new LambdaQueryWrapper<>();
-        userQueryWrapper.eq(CommonUtil.isNotBlank(userQuery.getUserId()), UserDO::getId, userQuery.getUserId())
-                .eq(CommonUtil.isNotBlank(userQuery.getUsername()), UserDO::getUsername, userQuery.getUsername())
-                .eq(CommonUtil.isNotBlank(userQuery.getFlag()), UserDO::getFlag, userQuery.getFlag());
+        userQueryWrapper.eq(StringUtil.isNotBlank(userQuery.getUserId()), UserDO::getId, userQuery.getUserId())
+                .eq(StringUtil.isNotBlank(userQuery.getUsername()), UserDO::getUsername, userQuery.getUsername())
+                .eq(StringUtil.isNotBlank(userQuery.getFlag()), UserDO::getFlag, userQuery.getFlag());
 
         UserDO userDO = userDAO.selectOne(userQueryWrapper);
         return systemMapStruct.userDOToBO(userDO);
     }
 
     @Override
-    public Result pageUsers(UserQuery userQuery) {
+    public Response pageUsers(UserQuery userQuery) {
         LambdaQueryWrapper<UserDO> userQueryWrapper = new LambdaQueryWrapper<>();
-        userQueryWrapper.eq(CommonUtil.isNotBlank(userQuery.getFlag()), UserDO::getFlag, userQuery.getFlag())
-                .like(CommonUtil.isNotBlank(userQuery.getUsername()), UserDO::getUsername, userQuery.getUsername());
+        userQueryWrapper.eq(StringUtil.isNotBlank(userQuery.getFlag()), UserDO::getFlag, userQuery.getFlag())
+                .like(StringUtil.isNotBlank(userQuery.getUsername()), UserDO::getUsername, userQuery.getUsername());
 
         Page<UserDO> page = new Page<>(userQuery.getCurrentPage(), userQuery.getPageSize());
         Page<UserDO> userDOPage = userDAO.selectPage(page, userQueryWrapper);
@@ -74,7 +77,7 @@ public class UserServiceImpl implements UserService {
 
         Map<String, List<UserRoleBO>> userRoleBOMap = userRoleBOS.stream().collect(Collectors.groupingBy(UserRoleBO::getUserId));
         List<String> roleIds = userRoleBOS.stream().map(UserRoleBO::getRoleId).collect(Collectors.toList());
-        List<RoleVO> roleVOS = CommonUtil.castToList(roleService.listRoles(RoleQuery.builder().roleIds(roleIds).build()).getData(), RoleVO.class);
+        List<RoleVO> roleVOS = ListUtil.castToList(RoleVO.class, roleService.listRoles(RoleQuery.builder().roleIds(roleIds).build()).getData());
 
         Page<UserVO> userVOPage = systemMapStruct.pageUserDOToVO(userDOPage);
         for (UserVO userVO : userVOPage.getRecords()) {
@@ -87,15 +90,15 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        return Result.success("查询用户列表成功", userVOPage);
+        return Response.success("查询用户列表成功", userVOPage);
     }
 
     @Transactional
     @Override
-    public Result addUser(UserCommand userCommand) {
+    public Response addUser(UserCommand userCommand) {
         UserBO userBO = getUser(UserQuery.builder().username(userCommand.getUsername()).build());
-        if (CommonUtil.isNotBlank(userBO)) {
-            return Result.fail("用户名已存在, 请重新输入新的用户名", null);
+        if (null != userBO) {
+            return Response.fail("用户名已存在, 请重新输入新的用户名", null);
         }
 
         UserDO userDO = systemMapStruct.userCommandToDO(userCommand);
@@ -110,35 +113,35 @@ public class UserServiceImpl implements UserService {
         int userInsert = userDAO.insert(userDO);
         int userRoleInsert = userRoleService.addUserRole(userId);
 
-        return Result.success("添加用户成功", userInsert + userRoleInsert);
+        return Response.success("添加用户成功", userInsert + userRoleInsert);
     }
 
     @Override
-    public Result updateUser(UserCommand userCommand) {
+    public Response updateUser(UserCommand userCommand) {
         UserBO userBO = getUser(UserQuery.builder().username(userCommand.getUsername()).build());
-        if (CommonUtil.isNotBlank(userBO) && !userBO.getId().equals(userCommand.getId())) {
-            return Result.fail("用户名已存在, 请重新输入新的用户名", null);
+        if (null != userBO && !userBO.getId().equals(userCommand.getId())) {
+            return Response.fail("用户名已存在, 请重新输入新的用户名", null);
         }
 
         UserDO userDO = systemMapStruct.userCommandToDO(userCommand);
 
-        if (CommonUtil.isNotBlank(userCommand.getPassword())) {
+        if (StringUtil.isNotBlank(userCommand.getPassword())) {
             userDO.setPassword(passwordEncoder.encode(userDO.getPassword()));
         }
         userDO.setUpdateTime(Timestamp.valueOf(LocalDateTime.now()));
-        return Result.success("修改用户成功", userDAO.updateById(userDO));
+        return Response.success("修改用户成功", userDAO.updateById(userDO));
     }
 
     @Transactional
     @Override
-    public Result deleteUser(UserCommand userCommand, String userId) {
+    public Response deleteUser(UserCommand userCommand, String userId) {
         if (userCommand.getIds().contains(userId)) {
-            return Result.fail("删除的用户中包含当前登录用户, 不允许删除", null);
+            return Response.fail("删除的用户中包含当前登录用户, 不允许删除", null);
         }
 
         int deleteUserNum = userDAO.deleteBatchIds(userCommand.getIds());
         int deleteUserRoleNum = userRoleService.deleteUserRole(UserRoleCommand.builder().userIds(userCommand.getIds()).build());
 
-        return Result.success("删除用户成功", deleteUserNum + deleteUserRoleNum);
+        return Response.success("删除用户成功", deleteUserNum + deleteUserRoleNum);
     }
 }

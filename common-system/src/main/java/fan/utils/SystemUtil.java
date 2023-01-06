@@ -35,7 +35,7 @@ public class SystemUtil {
             MenuVO parentMenuVO = menuVOMap.get(menuVO.getParentId());
 
             // 父菜单为空则当前菜单为顶级菜单, 直接加入结果列表
-            if (CommonUtil.isBlank(parentMenuVO)) {
+            if (null == parentMenuVO) {
                 menusTree.add(menuVO);
                 continue;
             }

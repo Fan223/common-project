@@ -2,7 +2,7 @@ package fan.hander;
 
 import cn.hutool.json.JSONUtil;
 import fan.utils.LogUtil;
-import fan.utils.Result;
+import fan.base.Response;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -32,7 +32,7 @@ public class UnAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
         // 返回响应信息
         ServletOutputStream outputStream = response.getOutputStream();
-        Result fail = Result.fail(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage(), "UnAuthenticationEntryPoint");
+        Response fail = Response.fail(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage(), "UnAuthenticationEntryPoint");
         outputStream.write(JSONUtil.toJsonStr(fail).getBytes(StandardCharsets.UTF_8));
 
         // 关闭流

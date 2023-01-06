@@ -9,9 +9,10 @@ import fan.query.RoleMenuQuery;
 import fan.query.RoleQuery;
 import fan.query.UserRoleQuery;
 import fan.service.*;
-import fan.utils.CommonUtil;
+
 import fan.utils.LogUtil;
 import fan.utils.RedisUtil;
+import fan.utils.collection.ListUtil;
 import fan.vo.MenuVO;
 import fan.vo.RoleVO;
 import org.springframework.context.annotation.Lazy;
@@ -78,7 +79,7 @@ public class SystemServeImpl implements SystemService {
 
         if (null != roleIds) {
             // 通过获取的角色 ID 列表查询对应的角色信息
-            List<RoleVO> roleVOS = CommonUtil.castToList(roleService.listRoles(RoleQuery.builder().roleIds(roleIds).build()).getData(), RoleVO.class);
+            List<RoleVO> roleVOS = ListUtil.castToList(RoleVO.class, roleService.listRoles(RoleQuery.builder().roleIds(roleIds).build()).getData());
             String roleAuthorities = roleVOS.stream().map(roleVO -> "ROLE_" + roleVO.getCode()).collect(Collectors.joining(","));
             authorities.append(roleAuthorities).append(",");
 
@@ -87,7 +88,7 @@ public class SystemServeImpl implements SystemService {
 
             if (null != menuIds) {
                 // 通过获取到的菜单 ID 列表查询对应的菜单信息, 包含全部类型菜单
-                List<Integer> menuTypes = MenuTypeEnum.getTypeValues(CommonUtil.transToList(String.class, "目录", "菜单", "按钮"));
+                List<Integer> menuTypes = MenuTypeEnum.getTypeValues(ListUtil.transToList("目录", "菜单", "按钮"));
                 List<MenuVO> menuVOS = menuService.listMenus(MenuQuery.builder().flag("Y").type(menuTypes).menuIds(menuIds).build());
                 String menuAuthorities = menuVOS.stream().map(MenuVO::getPermission).collect(Collectors.joining(","));
 
@@ -99,13 +100,13 @@ public class SystemServeImpl implements SystemService {
     }
 
     public List<String> listRoleIds(String authKey, String userId) {
-        List<String> roleIds = CommonUtil.castToList(RedisUtil.hashGet(authKey, SystemConst.ROLE_IDS), String.class);
+        List<String> roleIds = ListUtil.castToList(String.class, RedisUtil.hashGet(authKey, SystemConst.ROLE_IDS));
 
-        if (CommonUtil.isBlank(roleIds)) {
+        if (ListUtil.isEmpty(roleIds)) {
             List<UserRoleBO> userRoleBOS = userRoleService.listUserRoles(UserRoleQuery.builder().userId(userId).flag("Y").build());
             roleIds = userRoleBOS.stream().map(UserRoleBO::getRoleId).collect(Collectors.toList());
 
-            if (CommonUtil.isBlank(roleIds)) {
+            if (ListUtil.isEmpty(roleIds)) {
                 LogUtil.error("用户未拥有角色权限");
                 return null;
             }
@@ -117,12 +118,12 @@ public class SystemServeImpl implements SystemService {
     }
 
     public List<String> listMenuIds(String authKey, List<String> roleIds) {
-        List<String> menuIds = CommonUtil.castToList(RedisUtil.hashGet(authKey, SystemConst.MENU_IDS), String.class);
+        List<String> menuIds = ListUtil.castToList(String.class, RedisUtil.hashGet(authKey, SystemConst.MENU_IDS));
 
-        if (CommonUtil.isBlank(menuIds)) {
+        if (ListUtil.isEmpty(menuIds)) {
             menuIds = roleMenuService.listMenuIds(RoleMenuQuery.builder().roleIds(roleIds).flag("Y").build());
 
-            if (CommonUtil.isBlank(menuIds)) {
+            if (ListUtil.isEmpty(menuIds)) {
                 LogUtil.error("用户未拥有菜单权限");
                 return null;
             }
@@ -146,7 +147,7 @@ public class SystemServeImpl implements SystemService {
         List<UserRoleBO> userRoleBOS = userRoleService.listUserRoles(UserRoleQuery.builder().roleId(systemCommand.getRoleId())
                 .roleIds(systemCommand.getRoleIds()).build());
 
-        if (CommonUtil.isNotBlank(userRoleBOS)) {
+        if (ListUtil.isNotEmpty(userRoleBOS)) {
             List<String> userIds = userRoleBOS.stream().map(UserRoleBO::getUserId).collect(Collectors.toList());
 
             List<String> keys = userIds.stream().map(userId -> SystemConst.AUTHENTICATION + ":" + userId).collect(Collectors.toList());

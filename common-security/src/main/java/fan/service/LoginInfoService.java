@@ -2,7 +2,7 @@ package fan.service;
 
 import fan.entity.LoginInfoDO;
 import fan.query.LoginInfoQuery;
-import fan.utils.Result;
+import fan.base.Response;
 
 /**
  * 登录信息接口
@@ -45,9 +45,9 @@ public interface LoginInfoService {
      * 分页查询登录信息
      *
      * @param loginInfoQuery 登录信息查询类
-     * @return {@link Result}
+     * @return {@link Response}
      * @author Fan
      * @since 2022/12/16 1:07
      */
-    Result pageLoginInfos(LoginInfoQuery loginInfoQuery);
+    Response pageLoginInfos(LoginInfoQuery loginInfoQuery);
 }

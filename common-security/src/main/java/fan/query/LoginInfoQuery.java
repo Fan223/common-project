@@ -1,5 +1,6 @@
 package fan.query;
 
+import fan.base.BaseQuery;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,7 +12,7 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class LoginInfoQuery extends BaseQuery{
+public class LoginInfoQuery extends BaseQuery {
 
     // 用户名
     private String username;

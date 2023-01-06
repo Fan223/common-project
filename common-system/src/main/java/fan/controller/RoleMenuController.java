@@ -3,7 +3,7 @@ package fan.controller;
 import fan.command.RoleMenuCommand;
 import fan.query.RoleMenuQuery;
 import fan.service.RoleMenuService;
-import fan.utils.Result;
+import fan.base.Response;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,14 +26,14 @@ public class RoleMenuController {
      * 通过角色 ID 获取菜单列表
      *
      * @param roleId 角色ID
-     * @return {@link Result}
+     * @return {@link Response}
      * @author Fan
      * @since 2022/12/1 11:12
      */
     @PreAuthorize("hasAnyAuthority('roleMenu:assignPermission')")
     @GetMapping("/listMenuIds/{roleId}")
-    public Result listMenuIds(@PathVariable("roleId") String roleId) {
-        return Result.success("获取菜单列表成功", roleMenuService.listMenuIds(RoleMenuQuery.builder().roleId(roleId).build()));
+    public Response listMenuIds(@PathVariable("roleId") String roleId) {
+        return Response.success("获取菜单列表成功", roleMenuService.listMenuIds(RoleMenuQuery.builder().roleId(roleId).build()));
     }
 
     /**
@@ -41,13 +41,13 @@ public class RoleMenuController {
      *
      * @param roleId          角色ID
      * @param roleMenuCommand 角色菜单更新参数
-     * @return {@link Result}
+     * @return {@link Response}
      * @author Fan
      * @since 2022/12/1 11:13
      */
     @PreAuthorize("hasAnyAuthority('roleMenu:assignPermission')")
     @PostMapping("/assignPermissions/{roleId}")
-    public Result assignPermissions(@PathVariable("roleId") String roleId,
+    public Response assignPermissions(@PathVariable("roleId") String roleId,
                                     @RequestBody RoleMenuCommand roleMenuCommand) {
         return roleMenuService.assignPermissions(roleId, roleMenuCommand);
     }

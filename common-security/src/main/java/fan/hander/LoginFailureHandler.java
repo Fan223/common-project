@@ -2,7 +2,7 @@ package fan.hander;
 
 import cn.hutool.json.JSONUtil;
 import fan.utils.LogUtil;
-import fan.utils.Result;
+import fan.base.Response;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
@@ -29,7 +29,7 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
         // 返回响应信息
         response.setContentType("application/json;charset=utf-8");
         ServletOutputStream outputStream = response.getOutputStream();
-        Result fail = Result.fail(HttpServletResponse.SC_UNAUTHORIZED, exception.getMessage(), "failureHandler");
+        Response fail = Response.fail(HttpServletResponse.SC_UNAUTHORIZED, exception.getMessage(), "failureHandler");
         outputStream.write(JSONUtil.toJsonStr(fail).getBytes(StandardCharsets.UTF_8));
 
         // 关闭流

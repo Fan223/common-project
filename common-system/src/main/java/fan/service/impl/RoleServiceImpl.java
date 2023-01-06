@@ -14,9 +14,11 @@ import fan.service.RoleMenuService;
 import fan.service.RoleService;
 import fan.service.SystemService;
 import fan.service.UserRoleService;
-import fan.utils.CommonUtil;
-import fan.utils.Result;
+
+import fan.base.Response;
 import fan.utils.SystemMapStruct;
+import fan.utils.collection.ListUtil;
+import fan.utils.collection.StringUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,41 +53,41 @@ public class RoleServiceImpl implements RoleService {
     private SystemService systemService;
 
     @Override
-    public Result listRoles(RoleQuery roleQuery) {
+    public Response listRoles(RoleQuery roleQuery) {
         List<RoleDO> roleDOS = roleDAO.selectList(getRoleQueryWrapper(roleQuery));
 
-        return Result.success("获取角色列表成功", roleDOS.stream().map(roleDO -> systemMapStruct.roleDOToVO(roleDO))
+        return Response.success("获取角色列表成功", roleDOS.stream().map(roleDO -> systemMapStruct.roleDOToVO(roleDO))
                 .collect(Collectors.toList()));
     }
 
     private LambdaQueryWrapper<RoleDO> getRoleQueryWrapper(RoleQuery roleQuery) {
         LambdaQueryWrapper<RoleDO> roleQueryWrapper = new LambdaQueryWrapper<>();
 
-        roleQueryWrapper.eq(CommonUtil.isNotBlank(roleQuery.getFlag()), RoleDO::getFlag, roleQuery.getFlag())
-                .in(CommonUtil.isNotBlank(roleQuery.getRoleIds()), RoleDO::getId, roleQuery.getRoleIds())
-                .like(CommonUtil.isNotBlank(roleQuery.getName()), RoleDO::getName, roleQuery.getName())
-                .like(CommonUtil.isNotBlank(roleQuery.getCode()), RoleDO::getCode, roleQuery.getCode());
+        roleQueryWrapper.eq(StringUtil.isNotBlank(roleQuery.getFlag()), RoleDO::getFlag, roleQuery.getFlag())
+                .in(ListUtil.isNotEmpty(roleQuery.getRoleIds()), RoleDO::getId, roleQuery.getRoleIds())
+                .like(StringUtil.isNotBlank(roleQuery.getName()), RoleDO::getName, roleQuery.getName())
+                .like(StringUtil.isNotBlank(roleQuery.getCode()), RoleDO::getCode, roleQuery.getCode());
 
         return roleQueryWrapper;
     }
 
     @Override
-    public Result pageRoles(RoleQuery roleQuery) {
+    public Response pageRoles(RoleQuery roleQuery) {
         Page<RoleDO> page = new Page<>(roleQuery.getCurrentPage(), roleQuery.getPageSize());
         Page<RoleDO> rolePage = roleDAO.selectPage(page, getRoleQueryWrapper(roleQuery));
 
-        return Result.success("分页获取角色列表成功", systemMapStruct.pageRoleDOToVO(rolePage));
+        return Response.success("分页获取角色列表成功", systemMapStruct.pageRoleDOToVO(rolePage));
     }
 
     @Override
-    public Result addRole(RoleCommand roleCommand) {
+    public Response addRole(RoleCommand roleCommand) {
         RoleDO roleDO = systemMapStruct.roleCommandToDO(roleCommand);
 
         roleDO.setId(UUID.randomUUID().toString());
         roleDO.setCreateTime(Timestamp.valueOf(LocalDateTime.now()));
         roleDO.setUpdateTime(Timestamp.valueOf(LocalDateTime.now()));
 
-        return Result.success("添加角色成功", roleDAO.insert(roleDO));
+        return Response.success("添加角色成功", roleDAO.insert(roleDO));
     }
 
     /**
@@ -102,10 +104,10 @@ public class RoleServiceImpl implements RoleService {
 
     @Transactional
     @Override
-    public Result updateRole(RoleCommand roleCommand) {
+    public Response updateRole(RoleCommand roleCommand) {
         if ("root".equals(roleCommand.getId()) && !("root".equals(roleCommand.getCode()) && "Y".equals(roleCommand.getFlag()))
                 || "base".equals(roleCommand.getId()) && !("base".equals(roleCommand.getCode()) && "Y".equals(roleCommand.getFlag()))) {
-            return Result.fail("超级管理员或基础角色, 不允许修改角色编码或禁用", "root");
+            return Response.fail("超级管理员或基础角色, 不允许修改角色编码或禁用", "root");
         }
 
         RoleDO role = getRole(roleCommand.getId());
@@ -123,14 +125,14 @@ public class RoleServiceImpl implements RoleService {
             systemService.clearAuthoritiesByRole(SystemCommand.builder().roleId(roleCommand.getId()).build());
         }
 
-        return Result.success("修改角色成功", updateNum);
+        return Response.success("修改角色成功", updateNum);
     }
 
     @Transactional
     @Override
-    public Result deleteRole(RoleCommand roleCommand) {
+    public Response deleteRole(RoleCommand roleCommand) {
         if (roleCommand.getIds().contains("root") || roleCommand.getIds().contains("base")) {
-            return Result.fail("超级管理员或基础角色, 不允许删除", "root");
+            return Response.fail("超级管理员或基础角色, 不允许删除", "root");
         }
 
         int deleteRoleNum = roleDAO.deleteBatchIds(roleCommand.getIds());
@@ -139,6 +141,6 @@ public class RoleServiceImpl implements RoleService {
 
         systemService.clearAuthoritiesByRole(SystemCommand.builder().roleIds(roleCommand.getIds()).build());
 
-        return Result.success("删除角色成功", deleteRoleNum + deleteRoleMenuNum + deleteUserRoleNum);
+        return Response.success("删除角色成功", deleteRoleNum + deleteRoleMenuNum + deleteUserRoleNum);
     }
 }

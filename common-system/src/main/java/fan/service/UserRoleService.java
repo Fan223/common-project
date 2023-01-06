@@ -3,7 +3,7 @@ package fan.service;
 import fan.bo.UserRoleBO;
 import fan.command.UserRoleCommand;
 import fan.query.UserRoleQuery;
-import fan.utils.Result;
+import fan.base.Response;
 
 import java.util.List;
 
@@ -50,11 +50,11 @@ public interface UserRoleService {
      *
      * @param userId          用户ID
      * @param userRoleCommand 用户角色更新参数
-     * @return {@link Result}
+     * @return {@link Response}
      * @author Fan
      * @since 2022/12/11 6:35
      */
-    Result assignRoles(String userId, UserRoleCommand userRoleCommand);
+    Response assignRoles(String userId, UserRoleCommand userRoleCommand);
 
     /**
      * 更新用户角色

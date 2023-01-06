@@ -17,6 +17,10 @@
     <dependencies>
         <dependency>
             <groupId>fan</groupId>
+            <artifactId>common-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>fan</groupId>
             <artifactId>common-security</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>

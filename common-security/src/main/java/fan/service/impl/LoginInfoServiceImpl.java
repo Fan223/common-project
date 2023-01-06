@@ -9,8 +9,9 @@ import fan.entity.LoginInfoDO;
 import fan.query.LoginInfoQuery;
 import fan.service.LoginInfoService;
 import fan.utils.AuthMapStruct;
-import fan.utils.CommonUtil;
-import fan.utils.Result;
+
+import fan.base.Response;
+import fan.utils.collection.StringUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -60,15 +61,15 @@ public class LoginInfoServiceImpl implements LoginInfoService {
     }
 
     @Override
-    public Result pageLoginInfos(LoginInfoQuery loginInfoQuery) {
+    public Response pageLoginInfos(LoginInfoQuery loginInfoQuery) {
         LambdaQueryWrapper<LoginInfoDO> loginInfoDOQueryWrapper = new LambdaQueryWrapper<>();
-        loginInfoDOQueryWrapper.like(CommonUtil.isNotBlank(loginInfoQuery.getUsername()), LoginInfoDO::getUsername, loginInfoQuery.getUsername())
-                .like(CommonUtil.isNotBlank(loginInfoQuery.getIpAddress()), LoginInfoDO::getIpAddress, loginInfoQuery.getIpAddress())
+        loginInfoDOQueryWrapper.like(StringUtil.isNotBlank(loginInfoQuery.getUsername()), LoginInfoDO::getUsername, loginInfoQuery.getUsername())
+                .like(StringUtil.isNotBlank(loginInfoQuery.getIpAddress()), LoginInfoDO::getIpAddress, loginInfoQuery.getIpAddress())
                 .orderByAsc(LoginInfoDO::getUpdateTime);
 
         Page<LoginInfoDO> page = new Page<>(loginInfoQuery.getCurrentPage(), loginInfoQuery.getPageSize());
         Page<LoginInfoDO> loginInfoDOPage = loginInfoDAO.selectPage(page, loginInfoDOQueryWrapper);
 
-        return Result.success("分页获取登录信息成功", authMapStruct.pageLoginInfoDOToVO(loginInfoDOPage));
+        return Response.success("分页获取登录信息成功", authMapStruct.pageLoginInfoDOToVO(loginInfoDOPage));
     }
 }

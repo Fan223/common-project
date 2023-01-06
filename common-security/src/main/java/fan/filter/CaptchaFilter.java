@@ -4,9 +4,10 @@ import fan.consts.AuthConst;
 import fan.exception.CustomException;
 import fan.hander.LoginFailureHandler;
 import fan.utils.AuthUtil;
-import fan.utils.CommonUtil;
+
 import fan.utils.LogUtil;
 import fan.utils.RedisUtil;
+import fan.utils.collection.StringUtil;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -59,7 +60,7 @@ public class CaptchaFilter extends OncePerRequestFilter {
         String loginToken = request.getParameter("loginToken");
         String captcha = request.getParameter("captcha");
 
-        if (CommonUtil.isBlank(captcha) || CommonUtil.isBlank(loginToken)) {
+        if (StringUtil.isBlank(captcha) || StringUtil.isBlank(loginToken)) {
             throw new CustomException("验证码不能为空");
         }
 

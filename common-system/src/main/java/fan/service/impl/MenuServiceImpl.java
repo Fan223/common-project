@@ -2,6 +2,7 @@ package fan.service.impl;
 
 import cn.hutool.core.lang.UUID;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import fan.base.Response;
 import fan.command.MenuCommand;
 import fan.command.RoleMenuCommand;
 import fan.command.SystemCommand;
@@ -14,6 +15,8 @@ import fan.service.MenuService;
 import fan.service.RoleMenuService;
 import fan.service.SystemService;
 import fan.utils.*;
+import fan.utils.collection.ListUtil;
+import fan.utils.collection.StringUtil;
 import fan.vo.MenuVO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,11 +52,11 @@ public class MenuServiceImpl implements MenuService {
     public List<MenuVO> listMenus(MenuQuery menuQuery) {
         LambdaQueryWrapper<MenuDO> menuQueryWrapper = new LambdaQueryWrapper<>();
 
-        menuQueryWrapper.eq(CommonUtil.isNotBlank(menuQuery.getFlag()), MenuDO::getFlag, menuQuery.getFlag())
-                .in(CommonUtil.isNotBlank(menuQuery.getType()), MenuDO::getType, menuQuery.getType())
-                .in(CommonUtil.isNotBlank(menuQuery.getMenuIds()), MenuDO::getId, menuQuery.getMenuIds())
-                .like(CommonUtil.isNotBlank(menuQuery.getName()), MenuDO::getName, menuQuery.getName())
-                .like(CommonUtil.isNotBlank(menuQuery.getPermission()), MenuDO::getPermission, menuQuery.getPermission())
+        menuQueryWrapper.eq(StringUtil.isNotBlank(menuQuery.getFlag()), MenuDO::getFlag, menuQuery.getFlag())
+                .in(ListUtil.isNotEmpty(menuQuery.getType()), MenuDO::getType, menuQuery.getType())
+                .in(ListUtil.isNotEmpty(menuQuery.getMenuIds()), MenuDO::getId, menuQuery.getMenuIds())
+                .like(StringUtil.isNotBlank(menuQuery.getName()), MenuDO::getName, menuQuery.getName())
+                .like(StringUtil.isNotBlank(menuQuery.getPermission()), MenuDO::getPermission, menuQuery.getPermission())
                 .orderByAsc(MenuDO::getOrderNum);
 
         List<MenuDO> menuDOS = menuDAO.selectList(menuQueryWrapper);
@@ -65,8 +68,8 @@ public class MenuServiceImpl implements MenuService {
         String authKey = SystemConst.AUTHENTICATION + ":" + userId;
 
         // 从 Redis 中获取导航菜单列表
-        List<MenuVO> navMenuVOS = CommonUtil.castToList(RedisUtil.hashGet(authKey, SystemConst.NAV_MENUS), MenuVO.class);
-        if (CommonUtil.isNotBlank(navMenuVOS)) {
+        List<MenuVO> navMenuVOS = ListUtil.castToList(MenuVO.class, RedisUtil.hashGet(authKey, SystemConst.NAV_MENUS));
+        if (ListUtil.isNotEmpty(navMenuVOS)) {
             return navMenuVOS;
         }
 
@@ -79,7 +82,7 @@ public class MenuServiceImpl implements MenuService {
 
             if (null != menuIds) {
                 // 通过获取到的菜单 ID 列表查询对应的菜单信息, 只包括目录和菜单类型的菜单, 不包括按钮
-                List<Integer> menuTypes = MenuTypeEnum.getTypeValues(CommonUtil.transToList(String.class, "目录", "菜单"));
+                List<Integer> menuTypes = MenuTypeEnum.getTypeValues(ListUtil.transToList("目录", "菜单"));
                 List<MenuVO> menuVOS = listMenus(MenuQuery.builder().flag("Y").menuIds(menuIds).type(menuTypes).build());
                 navMenuVOS = SystemUtil.buildTree(menuVOS);
 
@@ -92,24 +95,24 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
-    public Result listMenusTree(MenuQuery menuQuery) {
+    public Response listMenusTree(MenuQuery menuQuery) {
         List<MenuVO> menuVOS = listMenus(menuQuery);
 
-        return Result.success("获取菜单列表成功", SystemUtil.buildTree(menuVOS));
+        return Response.success("获取菜单列表成功", SystemUtil.buildTree(menuVOS));
     }
 
     @Override
-    public Result addMenu(MenuCommand menuCommand) {
+    public Response addMenu(MenuCommand menuCommand) {
         MenuDO menuDO = systemMapStruct.menuCommandToDO(menuCommand);
 
-        if (CommonUtil.isBlank(menuDO.getParentId())) {
+        if (StringUtil.isBlank(menuDO.getParentId())) {
             menuDO.setParentId("root");
         }
         menuDO.setId(UUID.randomUUID().toString());
         menuDO.setCreateTime(Timestamp.valueOf(LocalDateTime.now()));
         menuDO.setUpdateTime(Timestamp.valueOf(LocalDateTime.now()));
 
-        return Result.success("添加菜单成功", menuDAO.insert(menuDO));
+        return Response.success("添加菜单成功", menuDAO.insert(menuDO));
     }
 
     /**
@@ -126,7 +129,7 @@ public class MenuServiceImpl implements MenuService {
 
     @Transactional
     @Override
-    public Result updateMenu(MenuCommand menuCommand) {
+    public Response updateMenu(MenuCommand menuCommand) {
         MenuDO menu = getMenu(menuCommand.getId());
 
         MenuDO menuDO = systemMapStruct.menuCommandToDO(menuCommand);
@@ -141,23 +144,23 @@ public class MenuServiceImpl implements MenuService {
             systemService.clearAuthoritiesByMenu(SystemCommand.builder().menuId(menuCommand.getId()).build());
         }
 
-        return Result.success("修改菜单成功", updateNum);
+        return Response.success("修改菜单成功", updateNum);
     }
 
     @Transactional
     @Override
-    public Result deleteMenu(MenuCommand menuCommand) {
+    public Response deleteMenu(MenuCommand menuCommand) {
         // 查询要删除的菜单列表的子菜单列表
         LambdaQueryWrapper<MenuDO> menuQueryWrapper = new LambdaQueryWrapper<>();
-        menuQueryWrapper.in(CommonUtil.isNotBlank(menuCommand.getIds()), MenuDO::getParentId, menuCommand.getIds());
+        menuQueryWrapper.in(ListUtil.isNotEmpty(menuCommand.getIds()), MenuDO::getParentId, menuCommand.getIds());
         List<MenuDO> menuDOS = menuDAO.selectList(menuQueryWrapper);
 
-        if (CommonUtil.isNotBlank(menuDOS)) {
+        if (ListUtil.isNotEmpty(menuDOS)) {
             // 获取子菜单列表的 ID 列表
             List<String> childrenIds = menuDOS.stream().map(MenuDO::getId).collect(Collectors.toList());
 
             if (!menuCommand.getIds().containsAll(childrenIds)) {
-                return Result.fail("您删除的菜单存在子菜单, 请先删除子菜单", menuDOS);
+                return Response.fail("您删除的菜单存在子菜单, 请先删除子菜单", menuDOS);
             }
         }
 
@@ -165,6 +168,6 @@ public class MenuServiceImpl implements MenuService {
         int delRoleMenuNum = roleMenuService.deleteRoleMenu(RoleMenuCommand.builder().menuIds(menuCommand.getIds()).build());
 
         systemService.clearAuthoritiesByMenu(SystemCommand.builder().menuIds(menuCommand.getIds()).build());
-        return Result.success("删除菜单成功", delMenuNum + delRoleMenuNum);
+        return Response.success("删除菜单成功", delMenuNum + delRoleMenuNum);
     }
 }

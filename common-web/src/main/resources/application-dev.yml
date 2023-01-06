@@ -2,7 +2,7 @@ server:
   port: 8881
   servlet:
     # 上下文路径
-    context-path: /comm
+    context-path: /resNav
 spring:
   datasource:
     druid:

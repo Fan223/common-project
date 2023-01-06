@@ -9,8 +9,10 @@ import fan.entity.RoleMenuDO;
 import fan.query.RoleMenuQuery;
 import fan.service.RoleMenuService;
 import fan.service.SystemService;
-import fan.utils.CommonUtil;
-import fan.utils.Result;
+
+import fan.base.Response;
+import fan.utils.collection.ListUtil;
+import fan.utils.collection.StringUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,12 +41,12 @@ public class RoleMenuServiceImpl implements RoleMenuService {
     @Override
     public List<String> listMenuIds(RoleMenuQuery roleMenuQuery) {
         LambdaQueryWrapper<RoleMenuDO> roleMenuQueryWrapper = new LambdaQueryWrapper<>();
-        roleMenuQueryWrapper.eq(CommonUtil.isNotBlank(roleMenuQuery.getRoleId()), RoleMenuDO::getRoleId, roleMenuQuery.getRoleId())
-                .eq(CommonUtil.isNotBlank(roleMenuQuery.getFlag()), RoleMenuDO::getFlag, roleMenuQuery.getFlag())
-                .in(CommonUtil.isNotBlank(roleMenuQuery.getRoleIds()), RoleMenuDO::getRoleId, roleMenuQuery.getRoleIds());
+        roleMenuQueryWrapper.eq(StringUtil.isNotBlank(roleMenuQuery.getRoleId()), RoleMenuDO::getRoleId, roleMenuQuery.getRoleId())
+                .eq(StringUtil.isNotBlank(roleMenuQuery.getFlag()), RoleMenuDO::getFlag, roleMenuQuery.getFlag())
+                .in(ListUtil.isNotEmpty(roleMenuQuery.getRoleIds()), RoleMenuDO::getRoleId, roleMenuQuery.getRoleIds());
 
         List<RoleMenuDO> roleMenuDOS = roleMenuDAO.selectList(roleMenuQueryWrapper);
-        if (CommonUtil.isBlank(roleMenuDOS)) {
+        if (ListUtil.isEmpty(roleMenuDOS)) {
             return null;
         }
 
@@ -55,16 +57,16 @@ public class RoleMenuServiceImpl implements RoleMenuService {
     public int deleteRoleMenu(RoleMenuCommand roleMenuCommand) {
         LambdaQueryWrapper<RoleMenuDO> roleMenuDeleteWrapper = new LambdaQueryWrapper<>();
 
-        roleMenuDeleteWrapper.eq(CommonUtil.isNotBlank(roleMenuCommand.getRoleId()), RoleMenuDO::getRoleId, roleMenuCommand.getRoleId())
-                .in(CommonUtil.isNotBlank(roleMenuCommand.getMenuIds()), RoleMenuDO::getMenuId, roleMenuCommand.getMenuIds())
-                .in(CommonUtil.isNotBlank(roleMenuCommand.getRoleIds()), RoleMenuDO::getRoleId, roleMenuCommand.getRoleIds());
+        roleMenuDeleteWrapper.eq(StringUtil.isNotBlank(roleMenuCommand.getRoleId()), RoleMenuDO::getRoleId, roleMenuCommand.getRoleId())
+                .in(ListUtil.isNotEmpty(roleMenuCommand.getMenuIds()), RoleMenuDO::getMenuId, roleMenuCommand.getMenuIds())
+                .in(ListUtil.isNotEmpty(roleMenuCommand.getRoleIds()), RoleMenuDO::getRoleId, roleMenuCommand.getRoleIds());
 
         return roleMenuDAO.delete(roleMenuDeleteWrapper);
     }
 
     @Transactional
     @Override
-    public Result assignPermissions(String roleId, RoleMenuCommand roleMenuCommand) {
+    public Response assignPermissions(String roleId, RoleMenuCommand roleMenuCommand) {
         // 先删除该角色原来的菜单权限
         deleteRoleMenu(RoleMenuCommand.builder().roleId(roleId).build());
 
@@ -83,14 +85,14 @@ public class RoleMenuServiceImpl implements RoleMenuService {
         }
 
         systemService.clearAuthoritiesByRole(SystemCommand.builder().roleId(roleId).build());
-        return Result.success("分配菜单权限成功", roleMenuCommand.getMenuIds().size());
+        return Response.success("分配菜单权限成功", roleMenuCommand.getMenuIds().size());
     }
 
     @Override
     public List<String> listRoleIds(RoleMenuQuery roleMenuQuery) {
         LambdaQueryWrapper<RoleMenuDO> roleMenuDOQueryWrapper = new LambdaQueryWrapper<>();
-        roleMenuDOQueryWrapper.eq(CommonUtil.isNotBlank(roleMenuQuery.getMenuId()), RoleMenuDO::getMenuId, roleMenuQuery.getMenuId())
-                .in(CommonUtil.isNotBlank(roleMenuQuery.getMenuIds()), RoleMenuDO::getMenuId, roleMenuQuery.getMenuIds());
+        roleMenuDOQueryWrapper.eq(StringUtil.isNotBlank(roleMenuQuery.getMenuId()), RoleMenuDO::getMenuId, roleMenuQuery.getMenuId())
+                .in(ListUtil.isNotEmpty(roleMenuQuery.getMenuIds()), RoleMenuDO::getMenuId, roleMenuQuery.getMenuIds());
 
         List<RoleMenuDO> roleMenuDOS = roleMenuDAO.selectList(roleMenuDOQueryWrapper);
         return roleMenuDOS.stream().map(RoleMenuDO::getRoleId).distinct().collect(Collectors.toList());
@@ -100,8 +102,8 @@ public class RoleMenuServiceImpl implements RoleMenuService {
     public int updateRoleMenu(RoleMenuCommand roleMenuCommand) {
         LambdaUpdateWrapper<RoleMenuDO> roleMenuDOUpdateWrapper = new LambdaUpdateWrapper<>();
         roleMenuDOUpdateWrapper.set(RoleMenuDO::getFlag, roleMenuCommand.getFlag())
-                .eq(CommonUtil.isNotBlank(roleMenuCommand.getRoleId()), RoleMenuDO::getRoleId, roleMenuCommand.getRoleId())
-                .eq(CommonUtil.isNotBlank(roleMenuCommand.getMenuId()), RoleMenuDO::getMenuId, roleMenuCommand.getMenuId());
+                .eq(StringUtil.isNotBlank(roleMenuCommand.getRoleId()), RoleMenuDO::getRoleId, roleMenuCommand.getRoleId())
+                .eq(StringUtil.isNotBlank(roleMenuCommand.getMenuId()), RoleMenuDO::getMenuId, roleMenuCommand.getMenuId());
 
         return roleMenuDAO.update(new RoleMenuDO(), roleMenuDOUpdateWrapper);
     }

@@ -4,9 +4,10 @@ import fan.consts.AuthConst;
 import fan.exception.CustomException;
 import fan.hander.UnAuthenticationEntryPoint;
 import fan.service.SystemService;
-import fan.utils.CommonUtil;
+
 import fan.utils.JwtUtil;
 import fan.utils.LogUtil;
+import fan.utils.collection.StringUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,7 +58,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String jwt = request.getHeader(AuthConst.AUTH_KEY);
-        if (CommonUtil.isBlank(jwt)) {
+        if (StringUtil.isBlank(jwt)) {
             LogUtil.error("JWT为空");
             filterChain.doFilter(request, response);
             return;

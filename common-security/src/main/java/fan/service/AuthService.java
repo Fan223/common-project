@@ -1,6 +1,6 @@
 package fan.service;
 
-import fan.utils.Result;
+import fan.base.Response;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -16,9 +16,9 @@ public interface AuthService {
      * 获取验证码
      *
      * @param request 请求
-     * @return {@link Result}
+     * @return {@link Response}
      * @author Fan
      * @since 2022/11/27 6:25
      */
-    Result getCaptcha(HttpServletRequest request);
+    Response getCaptcha(HttpServletRequest request);
 }
